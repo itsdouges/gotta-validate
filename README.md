@@ -79,11 +79,6 @@ Rules which you can use without needing to add yourself are as follows (after us
 ```
 GottaValidate.addDefaultRules();
 
-'email'
-'no-white-space'
-'password'
-'required'
-
 GottaValidate.addResource({
     name: 'cool-resource',
     mode: 'mode',
@@ -185,11 +180,11 @@ name (required), func (required), inherits (optional)
 #### 2.2.2 addResource(options)
 Add a resource. Returns this.
 
-#### 2.2.3 addDefaultRules()
-Adds the default rules to the rule table.
-
 Options properties:
 name (required), mode (required), rules (optional)
+
+#### 2.2.3 addDefaultRules()
+Adds the default rules to the rule table.
 
 ### 2.3 Instance methods
 #### 2.3.1 validate(object)
