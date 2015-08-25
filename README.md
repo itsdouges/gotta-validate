@@ -1,7 +1,7 @@
 # Gotta Validate!
 A POJO object validator for node, built with resources, promises, and testing in mind. 
 
-Currently being used on armory.net.au's node backend. Still a work in progress and missing many common validators. If you're using **Gotta Validate!** please submit pull requests to add validators you've made! Make sure to add tests else it will be rejected.
+Currently being used on armory.net.au's node backend. Still a work in progress and missing many common validators. If you're using **Gotta Validate!** please submit pull requests to add rules you've made! Make sure to add tests else it will be rejected.
 
 To run tests use: `gulp test`.
 
@@ -73,8 +73,28 @@ validator
     });
 ```
 
-### 1.2 Extra stuff
-#### 1.2.1 Promise based rules
+### 1.2 Pre-defined Rules
+Rules which you can use without needing to add yourself are as follows (after using the addDefaultRules method).
+
+```
+GottaValidate.addDefaultRules();
+
+'email'
+'no-white-space'
+'password'
+'required'
+
+GottaValidate.addResource({
+    name: 'cool-resource',
+    mode: 'mode',
+    rules: {
+        aCoolProperty: ['email', 'no-white-space', 'password', 'required']
+    }
+});
+```
+
+### 1.3 Extra stuff
+#### 1.3.1 Promise based rules
 You can add promise based rules like the following. You can use any library that will work with **q**. Just make sure you return a promise! If an error occurred return an object like in the example.
 
 ```
@@ -100,7 +120,7 @@ GottaValidate.addRule({
     }
 });
 ```
-### 1.2.2 Rules with dependencies
+### 1.3.2 Rules with dependencies
 You can also add rules that have dependencies. Promise based or synchronous!
 
 ```
@@ -118,7 +138,7 @@ GottaValidate.addRule({
 });
 ```
 
-### 1.2.3 Rules that inherit
+### 1.3.3 Rules that inherit
 ```
     GottaValidate.addRule({
         name: 'rule-a',
@@ -164,6 +184,9 @@ name (required), func (required), inherits (optional)
 
 #### 2.2.2 addResource(options)
 Add a resource. Returns this.
+
+#### 2.2.3 addDefaultRules()
+Adds the default rules to the rule table.
 
 Options properties:
 name (required), mode (required), rules (optional)

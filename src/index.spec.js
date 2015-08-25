@@ -2,31 +2,31 @@
 
 var q = require('q');
 
-var ResourceValidator;
+var GottaValidate;
 
 describe('resource validator', function () {
 	beforeEach(function () {
-		ResourceValidator = require('./index');
+		GottaValidate = require('./index');
 	});
 
 	describe('instantiation', function () {
 		it('should throw error if resource is not defined', function () {
 			expect(function () {
-				ResourceValidator({
+				GottaValidate({
 					resource: 'not-defined',
 					mode: 'not-defined'
 				});
-			}).toThrow(Error('Resource is not defined, add one via. ResourceValidator.addResource({}) before trying to instantiate!'));
+			}).toThrow(Error('Resource is not defined, add one via. GottaValidate.addResource({}) before trying to instantiate!'));
 		});
 
 		it('should throw error if mode is not defined', function () {
 			expect(function () {
-				ResourceValidator.addRule({
+				GottaValidate.addRule({
 					name: 'defined',
 					func: function () {}
 				});
 
-				ResourceValidator.addResource({
+				GottaValidate.addResource({
 					name: 'name',
 					mode: 'create',
 					rules: {
@@ -35,30 +35,30 @@ describe('resource validator', function () {
 					}
 				});
 
-				ResourceValidator({
+				GottaValidate({
 					resource: 'name',
 					mode: 'not-defined'
 				});
-			}).toThrow(Error('Resource mode is not defined, add one via. ResourceValidator.addResource({}) before trying to instantiate!'));
+			}).toThrow(Error('Resource mode is not defined, add one via. GottaValidate.addResource({}) before trying to instantiate!'));
 		});
 	});
 
 	describe('adding rule', function () {
 		it('should throw error if no object is passed in', function () {
 			expect(function () {
-				ResourceValidator.addRule();
+				GottaValidate.addRule();
 			}).toThrow(Error('Pass a rule object in!'));
 		});
 
 		it('should throw error if name isnt defined', function () {
 			expect(function () {
-				ResourceValidator.addRule({});
+				GottaValidate.addRule({});
 			}).toThrow(Error('Name must be a string!'));
 		});
 
 		it('should throw error if rule isnt a function', function () {
 			expect(function () {
-				ResourceValidator.addRule({
+				GottaValidate.addRule({
 					name: 'ayylmao'
 				});
 
@@ -67,7 +67,7 @@ describe('resource validator', function () {
 
 		it('should throw error when inheriting with string if rule not found', function () {
 			expect(function () {
-				ResourceValidator.addRule({
+				GottaValidate.addRule({
 					name: 'cool-rule',
 					func: function () {},
 					inherits: 'ayyy'
@@ -78,7 +78,7 @@ describe('resource validator', function () {
 
 		it('should throw error when inheriting with array if rule not found', function () {
 			expect(function () {
-				ResourceValidator.addRule({
+				GottaValidate.addRule({
 					name: 'cool-rule',
 					func: function () {},
 					inherits: ['ayyy']
@@ -91,7 +91,7 @@ describe('resource validator', function () {
 	describe('adding resource', function () {
 		it('should throw three errors on empty object', function () {
 			expect(function () {
-				ResourceValidator.addResource({});
+				GottaValidate.addResource({});
 			}).toThrow(Error(
 				[
 					'Name not defined', 
@@ -102,7 +102,7 @@ describe('resource validator', function () {
 
 		it('should throw error if rules isnt an object', function () {
 			expect(function () {
-				ResourceValidator.addResource({
+				GottaValidate.addResource({
 					name: 'name',
 					mode: 'create',
 					rules: 'not an object'
@@ -112,7 +112,7 @@ describe('resource validator', function () {
 
 		it('should throw error if any of the rules are an object', function () {
 			expect(function () {
-				ResourceValidator.addResource({
+				GottaValidate.addResource({
 					name: 'name',
 					mode: 'create',
 					rules: {
@@ -129,7 +129,7 @@ describe('resource validator', function () {
 
 		it('should throw error if any of the rules are arent defined', function () {
 			expect(function () {
-				ResourceValidator.addResource({
+				GottaValidate.addResource({
 					name: 'name',
 					mode: 'create',
 					rules: {
@@ -146,7 +146,7 @@ describe('resource validator', function () {
 
 		it('should add successfully', function () {
 			expect(function () {
-				ResourceValidator.addRule({
+				GottaValidate.addRule({
 					name: 'defined',
 					func: function () {}
 				})
@@ -155,7 +155,7 @@ describe('resource validator', function () {
 					func: function () {}
 				});
 
-				ResourceValidator.addResource({
+				GottaValidate.addResource({
 					name: 'name',
 					mode: 'create',
 					rules: {
@@ -179,10 +179,10 @@ describe('resource validator', function () {
 		var systemUnderTest;
 		var promiseRuleDefer;
 
-		ResourceValidator = require('./index');
+		GottaValidate = require('./index');
 
 		beforeEach(function () {
-			ResourceValidator.addRule({
+			GottaValidate.addRule({
 				name: 'required-synchronous',
 				func: function (name, object) {
 					if(!object[name]) {
@@ -191,7 +191,7 @@ describe('resource validator', function () {
 				}
 			});
 
-			ResourceValidator.addRule({
+			GottaValidate.addRule({
 				name: 'promise-with-dependency',
 				func: function (name, object, dependencies) {
 					expect(dependencies.a).toBeDefined();
@@ -207,7 +207,7 @@ describe('resource validator', function () {
 				}
 			});
 
-			ResourceValidator.addResource({
+			GottaValidate.addResource({
 				name: 'user',
 				mode: 'create',
 				rules: {
@@ -216,7 +216,7 @@ describe('resource validator', function () {
 				}
 			});
 
-			ResourceValidator.addResource({
+			GottaValidate.addResource({
 				name: 'user',
 				mode: 'update',
 				rules: {
@@ -226,7 +226,7 @@ describe('resource validator', function () {
 		});
 
 		it ('should throw error if object isnt passed in', function () {
-			systemUnderTest = ResourceValidator({
+			systemUnderTest = GottaValidate({
 				resource: 'user',
 				mode: 'create'
 			});
@@ -239,7 +239,7 @@ describe('resource validator', function () {
 		it ('should throw if resolved error object isnt as expected', function (done) {
 			done();
 
-			systemUnderTest = ResourceValidator({
+			systemUnderTest = GottaValidate({
 				resource: 'user',
 				mode: 'update'
 			});
@@ -255,7 +255,7 @@ describe('resource validator', function () {
 
 		describe('with string', function () {		
 			it ('should resolve promise with error email is required', function (done) {
-				systemUnderTest = ResourceValidator({
+				systemUnderTest = GottaValidate({
 					resource: 'user',
 					mode: 'create'
 				});
@@ -273,7 +273,7 @@ describe('resource validator', function () {
 			});
 
 			it ('should resolve promise', function (done) {
-				systemUnderTest = ResourceValidator({
+				systemUnderTest = GottaValidate({
 					resource: 'user',
 					mode: 'create'
 				});
@@ -289,7 +289,7 @@ describe('resource validator', function () {
 			});
 
 			it ('should reject promise with unique email is required error', function (done) {
-				systemUnderTest = ResourceValidator({
+				systemUnderTest = GottaValidate({
 					resource: 'user',
 					mode: 'create'
 				});
@@ -313,7 +313,7 @@ describe('resource validator', function () {
 			});
 
 			it ('should reject promise with required and unique error', function (done) {
-				systemUnderTest = ResourceValidator({
+				systemUnderTest = GottaValidate({
 					resource: 'user',
 					mode: 'create'
 				});
@@ -339,14 +339,14 @@ describe('resource validator', function () {
 			it ('should call inherited rules', function () {
 				var inheritPromiseRuleDefer;
 
-				ResourceValidator.addRule({
+				GottaValidate.addRule({
 					name: 'sync-rule',
 					func: function () {
 						return 'ayy sync';
 					}
 				});
 
-				ResourceValidator.addRule({
+				GottaValidate.addRule({
 					name: 'promise-rule-with-inheritance',
 					func: function (name, object) {
 						inheritPromiseRuleDefer = q.defer();
@@ -355,7 +355,7 @@ describe('resource validator', function () {
 					inherits: 'sync-rule'
 				});
 
-				ResourceValidator.addResource({
+				GottaValidate.addResource({
 					name: 'cool',
 					mode: 'cooler',
 					rules: {
@@ -363,7 +363,7 @@ describe('resource validator', function () {
 					}
 				});
 
-				systemUnderTest = ResourceValidator({
+				systemUnderTest = GottaValidate({
 					resource: 'cool',
 					mode: 'cooler'
 				});
@@ -386,7 +386,7 @@ describe('resource validator', function () {
 
 			it ('should throw if inherited rule doesnt exist', function () {
 				expect(function () {
-					ResourceValidator.addRule({
+					GottaValidate.addRule({
 						name: 'promise-rule-with-inheritance',
 						func: function (name, object) {
 							inheritPromiseRuleDefer = q.defer();
@@ -400,7 +400,7 @@ describe('resource validator', function () {
 
 		describe('with array', function () {
 			it ('should reject promise with unique error', function (done) {
-				systemUnderTest = ResourceValidator({
+				systemUnderTest = GottaValidate({
 					resource: 'user',
 					mode: 'update'
 				});
@@ -423,7 +423,7 @@ describe('resource validator', function () {
 			});
 
 			it ('should reject promise with required error', function (done) {
-				systemUnderTest = ResourceValidator({
+				systemUnderTest = GottaValidate({
 					resource: 'user',
 					mode: 'update'
 				});
@@ -443,14 +443,14 @@ describe('resource validator', function () {
 			it ('should call inherited rules', function () {
 				var inheritPromiseRuleDefer;
 
-				ResourceValidator.addRule({
+				GottaValidate.addRule({
 					name: 'sync-rule',
 					func: function () {
 						return 'ayy sync';
 					}
 				});
 
-				ResourceValidator.addRule({
+				GottaValidate.addRule({
 					name: 'promise-rule-with-inheritance',
 					func: function (name, object) {
 						inheritPromiseRuleDefer = q.defer();
@@ -459,7 +459,7 @@ describe('resource validator', function () {
 					inherits: ['sync-rule']
 				});
 
-				ResourceValidator.addResource({
+				GottaValidate.addResource({
 					name: 'cool',
 					mode: 'cooler',
 					rules: {
@@ -467,7 +467,7 @@ describe('resource validator', function () {
 					}
 				});
 
-				systemUnderTest = ResourceValidator({
+				systemUnderTest = GottaValidate({
 					resource: 'cool',
 					mode: 'cooler'
 				});
@@ -490,7 +490,7 @@ describe('resource validator', function () {
 
 			it ('should throw if inherited rule doesnt exist', function () {
 				expect(function () {
-					ResourceValidator.addRule({
+					GottaValidate.addRule({
 						name: 'promise-rule-with-inheritance',
 						func: function (name, object) {
 							inheritPromiseRuleDefer = q.defer();
@@ -499,6 +499,56 @@ describe('resource validator', function () {
 						inherits: ['no-exist']
 					});
 				}).toThrow(Error(['Rule [no-exist] not found, add it before trying to inherit']));
+			});
+		});
+	});
+
+	describe('pre defined rules', function () {
+		it('should have required', function () {
+			GottaValidate.addDefaultRules();
+
+			GottaValidate.addResource({
+				name: 'resource',
+				mode: 'mode',
+				rules: {
+					property: 'required'
+				}
+			});
+		});
+
+		it('should have noWhiteSpace', function () {
+			GottaValidate.addDefaultRules();
+
+			GottaValidate.addResource({
+				name: 'resource',
+				mode: 'mode',
+				rules: {
+					property: 'no-white-space'
+				}
+			});
+		});
+
+		it('should have password', function () {
+			GottaValidate.addDefaultRules();
+
+			GottaValidate.addResource({
+				name: 'resource',
+				mode: 'mode',
+				rules: {
+					property: 'password'
+				}
+			});
+		});
+
+		it('should have email', function () {
+			GottaValidate.addDefaultRules();
+			
+			GottaValidate.addResource({
+				name: 'resource',
+				mode: 'mode',
+				rules: {
+					property: 'email'
+				}
 			});
 		});
 	});

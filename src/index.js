@@ -5,13 +5,13 @@ var q = require('q');
 var resources = {};
 var rules = {};
 
-function ResourceValidator (options) {
+function GottaValidate (options) {
 	if (!resources[options.resource]) {
-		throw Error('Resource is not defined, add one via. ResourceValidator.addResource({}) before trying to instantiate!');
+		throw Error('Resource is not defined, add one via. GottaValidate.addResource({}) before trying to instantiate!');
 	}
 
 	if (!resources[options.resource][options.mode]) {
-		throw Error('Resource mode is not defined, add one via. ResourceValidator.addResource({}) before trying to instantiate!');
+		throw Error('Resource mode is not defined, add one via. GottaValidate.addResource({}) before trying to instantiate!');
 	}
 
 	var validate = function (object) {
@@ -99,7 +99,7 @@ function ResourceValidator (options) {
 	};
 };
 
-ResourceValidator.addRule = function (rule) {
+GottaValidate.addRule = function (rule) {
 	if (typeof rule !== 'object') {
 		throw Error('Pass a rule object in!');
 	}
@@ -137,7 +137,7 @@ ResourceValidator.addRule = function (rule) {
 	return this;
 };
 
-ResourceValidator.addResource = function (resource) {
+GottaValidate.addResource = function (resource) {
 	var errors = [];
 
 	// todo: add array capability to name so we can
@@ -192,4 +192,8 @@ ResourceValidator.addResource = function (resource) {
 	return this;
 };
 
-module.exports = ResourceValidator;
+GottaValidate.addDefaultRules = function () {
+	require('./add-default-rules')(GottaValidate);
+};
+
+module.exports = GottaValidate;
