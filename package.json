@@ -1,6 +1,6 @@
 {
   "name": "gotta-validate",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A POJO object validator for node, built with resources, promises, and testing in mind.",
   "main": "src/index.js",
   "dependencies": {
