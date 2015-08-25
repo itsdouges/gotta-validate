@@ -1,0 +1,35 @@
+{
+  "name": "gotta-validate",
+  "version": "0.1.0",
+  "description": "A POJO object validator for node, built with resources, promises, and testing in mind.",
+  "main": "src/index.js",
+  "dependencies": {
+    "fs": "0.0.2",
+    "path": "^0.11.14",
+    "q": "^1.4.1"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-jasmine": "^2.0.1",
+    "nodemon": "^1.4.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madou/gotta-validate"
+  },
+  "scripts": {
+    "test": "gulp test"
+  },
+  "bugs": "https://github.com/madou/gotta-validate/issues",
+  "keywords": [
+    "lets validate",
+    "node-validate",
+    "validator",
+    "validate",
+    "GottaValidate!",
+    "gotta validate",
+    "validate-it"
+  ],
+  "author": "madou",
+  "license": "MIT"
+}
