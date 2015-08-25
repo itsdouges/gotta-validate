@@ -6,8 +6,9 @@ Currently being used on armory.net.au's node backend. Still a work in progress a
 To run tests use: `gulp test`.
 
 ## 1. Examples
-## 1.1 General stuff
+### 1.1 General stuff
 Note: Take a look at src/example.spec.js for these tests.
+
 1. Require it!
 ```
 var GottaValidate = require('gotta-validate');
