@@ -9,12 +9,13 @@ To run tests use: `gulp test`.
 ### 1.1 General stuff
 Note: Take a look at src/example.spec.js for these tests.
 
-1. Require it!
+Require it!
+
 ```
 var GottaValidate = require('gotta-validate');
 ```
 
-2. Add rules you need, you can chain it too.
+Add rules you need, you can chain it too.
 ```
 GottaValidate.addRule({
     name: 'required',
@@ -28,7 +29,7 @@ GottaValidate.addRule({
 .addRule(..);
 ```
 
-3. Add resources you need, you can chain it too. Add the name of any property you want to validate to the rules object. It can be a single rule (string) or many rules with an array (of strings).
+Add resources you need, you can chain it too. Add the name of any property you want to validate to the rules object. It can be a single rule (string) or many rules with an array (of strings).
 ```
 GottaValidate.addResource({
     name: 'Users',
@@ -41,7 +42,7 @@ GottaValidate.addResource({
 .addResource(..);
 ```
 
-4. Now you gotta validate! Call the constructor function every time you want a different validator. The promise will resolve if validation was a success, and reject if any validators returned an error.
+Now you gotta validate! Call the constructor function every time you want a different validator. The promise will resolve if validation was a success, and reject if any validators returned an error.
 ```
 var validator = GottaValidate({
     resource: 'Users',
