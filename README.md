@@ -1,4 +1,7 @@
-# Gotta Validate!
+# Gotta Validate! 
+[![Build Status](https://img.shields.io/travis/madou/gotta-validate.svg)](https://travis-ci.org/madou/gotta-validate)
+[![NPM Version](https://img.shields.io/npm/v/gotta-validate.svg)](https://www.npmjs.com/package/gotta-validate)
+
 A POJO object validator for node, built with resources, promises, and testing in mind. 
 
 Currently being used on armory.net.au's node backend. Still a work in progress and missing many common validators. If you're using **Gotta Validate!** please submit pull requests to add rules you've made! Make sure to add tests else it will be rejected.
