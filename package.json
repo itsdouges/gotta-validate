@@ -20,13 +20,18 @@
   },
   "bugs": "https://github.com/madou/gotta-validate/issues",
   "keywords": [
+    "node validae",
+    "promise",
     "lets validate",
     "node-validate",
     "validator",
     "validate",
     "GottaValidate!",
     "gotta validate",
-    "validate-it"
+    "validate-it",
+    "promise based validator",
+    "resource validation",
+    "made for testing"
   ],
   "author": "madou",
   "license": "MIT"
