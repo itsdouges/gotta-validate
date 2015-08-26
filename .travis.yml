@@ -8,3 +8,9 @@ node_js:
 before_script:
   - npm install -g gulp
 script: gulp test
+deploy:
+	provider: npm
+	email: $EMAIL
+	api_key: $NPM_API_KEY
+	on:
+ 		tags: true
