@@ -1,7 +1,7 @@
 'use strict';
 
-function required(name, object) {
-	if (object[name] === undefined) {
+function required(name, val) {
+	if (val === undefined) {
 		return 'is required';
 	}
 

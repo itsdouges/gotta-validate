@@ -4,8 +4,11 @@ var q = require('q');
 
 var GottaValidate;
 
-describe('resource validator', function () {
+// TODO: Clear cache before each test it seems a lot of reuse of rules/resources is happening. BAD!
+
+describe('gotta validate', function () {
 	beforeEach(function () {
+		require.cache = undefined;
 		GottaValidate = require('./index');
 	});
 
@@ -110,21 +113,34 @@ describe('resource validator', function () {
 			}).toThrow(Error('Rules has to be an object!'));
 		});
 
-		it('should throw error if any of the rules are an object', function () {
+		it('should throw error if rule doesnt exist for complex object', function () {
 			expect(function () {
 				GottaValidate.addResource({
 					name: 'name',
 					mode: 'create',
 					rules: {
-						propertyName: {},
-						anotherProperty: [{}]
+						tokens: {
+							token: 'ahh'
+						}
 					}
 				});
-			})
-			.toThrow(Error([
-				'Rule for property [propertyName] can only be strings! Try a string or array of strings!',
-				'Rule in array for property [anotherProperty] can only be strings! Try a string or array of strings!',
-			]));
+			}).toThrow(Error('Rule "ahh" for property [token] is not defined. Add it before adding a resource!'));
+		});
+
+		it('should allow complex objects to be validated', function () {
+			GottaValidate.addDefaultRules();
+
+			expect(function () {
+				GottaValidate.addResource({
+					name: 'name',
+					mode: 'create',
+					rules: {
+						tokens: {
+							token: 'required'
+						}
+					}
+				});
+			}).not.toThrow();
 		});
 
 		it('should throw error if any of the rules are arent defined', function () {
@@ -140,7 +156,7 @@ describe('resource validator', function () {
 			})
 			.toThrow(Error([
 				'Rule "not defined" for property [propertyName] is not defined. Add it before adding a resource!',
-				'Rule "not-defined" in array for property [anotherProperty] is not defined. Add it before adding a resource!',
+				'Rule "not-defined" for property [anotherProperty] is not defined. Add it before adding a resource!',
 			]));
 		});
 
@@ -184,8 +200,8 @@ describe('resource validator', function () {
 		beforeEach(function () {
 			GottaValidate.addRule({
 				name: 'required-synchronous',
-				func: function (name, object) {
-					if(!object[name]) {
+				func: function (name, val) {
+					if(!val) {
 						return 'is required';
 					}
 				}
@@ -193,7 +209,7 @@ describe('resource validator', function () {
 
 			GottaValidate.addRule({
 				name: 'promise-with-dependency',
-				func: function (name, object, dependencies) {
+				func: function (name, val, dependencies) {
 					expect(dependencies.a).toBeDefined();
 					expect(dependencies.a.hey).toBe('im defined');
 
@@ -236,24 +252,7 @@ describe('resource validator', function () {
 			}).toThrow(Error('Only objects can be validated.'));
 		});
 
-		it ('should throw if resolved error object isnt as expected', function (done) {
-			done();
-
-			systemUnderTest = GottaValidate({
-				resource: 'user',
-				mode: 'update'
-			});
-
-			systemUnderTest.validate({
-				email: 'cool@email.com'
-			})
-			.then(null, function () {throw 'h';})
-			.done();
-
-			promiseRuleDefer.resolve('ahhhh');
-		});
-
-		describe('with string', function () {		
+		describe('with single rule', function () {		
 			it ('should resolve promise with error email is required', function (done) {
 				systemUnderTest = GottaValidate({
 					resource: 'user',
@@ -336,7 +335,7 @@ describe('resource validator', function () {
 				});
 			});
 
-			it ('should call inherited rules', function () {
+			it ('should call inherited rules', function (done) {
 				var inheritPromiseRuleDefer;
 
 				GottaValidate.addRule({
@@ -376,6 +375,8 @@ describe('resource validator', function () {
 						'[prop1] ayy sync',
 						'[prop1] is cool'
 					]);
+
+					done();
 				});
 
 				inheritPromiseRuleDefer.resolve({
@@ -388,7 +389,7 @@ describe('resource validator', function () {
 				expect(function () {
 					GottaValidate.addRule({
 						name: 'promise-rule-with-inheritance',
-						func: function (name, object) {
+						func: function (name, val) {
 							inheritPromiseRuleDefer = q.defer();
 							return inheritPromiseRuleDefer.promise;
 						},
@@ -398,7 +399,7 @@ describe('resource validator', function () {
 			});
 		});
 
-		describe('with array', function () {
+		describe('with array of rules', function () {
 			it ('should reject promise with unique error', function (done) {
 				systemUnderTest = GottaValidate({
 					resource: 'user',
@@ -440,7 +441,7 @@ describe('resource validator', function () {
 				promiseRuleDefer.resolve();
 			});
 
-			it ('should call inherited rules', function () {
+			it ('should call inherited rules', function (done) {
 				var inheritPromiseRuleDefer;
 
 				GottaValidate.addRule({
@@ -452,7 +453,7 @@ describe('resource validator', function () {
 
 				GottaValidate.addRule({
 					name: 'promise-rule-with-inheritance',
-					func: function (name, object) {
+					func: function (name, val) {
 						inheritPromiseRuleDefer = q.defer();
 						return inheritPromiseRuleDefer.promise;
 					},
@@ -480,6 +481,8 @@ describe('resource validator', function () {
 						'[prop1] ayy sync',
 						'[prop1] is cool'
 					]);
+
+					done();
 				});
 
 				inheritPromiseRuleDefer.resolve({
@@ -499,6 +502,105 @@ describe('resource validator', function () {
 						inherits: ['no-exist']
 					});
 				}).toThrow(Error(['Rule [no-exist] not found, add it before trying to inherit']));
+			});
+		});
+
+		describe('with complex objects', function () {
+			GottaValidate.addRule({
+				name: 'lmao',
+				func: function () {
+					return 'ur bad bro';
+				}
+			});
+
+			GottaValidate.addRule({
+				name: 'heheaa',
+				func: function () {
+					return 'haha wtf';
+				}
+			});
+
+			GottaValidate.addResource({
+				name: 'lol',
+				mode: 'cats',
+				rules: {
+					tokens: {
+						token: ['lmao', 'heheaa']
+					}
+				}
+			});
+
+			GottaValidate.addRule({
+				name: 't1',
+				func: function (name, val) {
+					if (val === 'token_one') {
+						return 't1 found!';
+					}
+				}
+			});
+
+			GottaValidate.addRule({
+				name: 't2',
+				func: function (name, val) {
+					if (val === 'token_two') {
+						return 't2 found!';
+					}
+				}
+			});
+
+			GottaValidate.addResource({
+				name: 'lol',
+				mode: 'arraysdoe',
+				rules: {
+					ayyy: {
+						ok: ['t1', 't2']
+					}
+				}
+			});
+
+			describe('that have array inputs', function () {
+				it('should reject with errors', function (done) {
+					var sut = GottaValidate({
+						resource: 'lol',
+						mode: 'arraysdoe'
+					});
+
+					sut.validate({
+						ayyy: {
+							ok: [
+								'token_one',
+								'token_two'
+							]
+						}
+					})
+					.then(null, function (e) {
+						expect(e).toEqual([
+							'[ok] t1 found!',
+							'[ok] t2 found!'
+						]);
+
+						done();
+					});
+				});
+			});
+
+			describe('objects', function () {
+				it('should reject wither errors', function (done) {
+					var sut = GottaValidate({
+						resource: 'lol',
+						mode: 'cats'
+					});
+
+					sut.validate({})
+						.then(null, function (e) {
+							expect(e).toEqual([
+								'[token] ur bad bro',
+								'[token] haha wtf'
+							]);
+
+							done();
+						});
+					});
 			});
 		});
 	});

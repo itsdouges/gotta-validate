@@ -1,5 +1,8 @@
 'use strict';
 
+// todo:
+// 1. add complex object validation support
+
 var q = require('q');
 
 var resources = {};
@@ -18,71 +21,93 @@ function GottaValidate (options) {
 		if (typeof object !== 'object') {
 			throw Error('Only objects can be validated.');
 		}
-		
-		function callValidator(propertyName, object, validator) {
-			if (validator.inherits) {
-				if (Array.isArray(validator.inherits)) {
-					validator.inherits.forEach(function (ruleName) {
-						callValidator(propertyName, object, rules[ruleName]);
-					});
-				} else {
-					callValidator(propertyName, object, rules[validator.inherits]);
-				}
-			}
-
-			var result = validator.func(property, object, validator.dependencies);
-			if (result !== undefined) {
-				if (result.toString && result.toString() === '[object Promise]') {
-					result.then(function (err) {
-						if (err) {
-							var errs = [];
-							if (!err.property) {
-								errs.push('[property] is expected on the resolved promise object');
-							}
-
-							if (!err.message) {
-								errs.push('[message] is expected on the resolved promise object');
-							}
-
-							if (errs.length) {
-								throw Error(errs);
-							}
-
-							errors.push('[' + err.property + '] ' + err.message);
-						}
-					});
-
-					validationPromises.push(result);
-				} else {
-					errors.push('[' + property + '] ' + result);
-					validationPromises.push(q.resolve());
-				}
-			}
-		}
 
 		var defer = q.defer();
 		var validationPromises = [];
 		var errors = [];
-
 		var resource = resources[options.resource][options.mode];
-		for (var property in resource.rules) {
-			if (!resource.rules.hasOwnProperty(property)) {
-				continue;
+		
+		function traversePropertyRules(propertyName, ob, validator) {
+			if (validator.inherits) {
+				if (Array.isArray(validator.inherits)) {
+					validator.inherits.forEach(function (ruleName) {
+						traversePropertyRules(propertyName, ob, rules[ruleName]);
+					});
+				} else {
+					traversePropertyRules(propertyName, ob, rules[validator.inherits]);
+				}
 			}
 
-			var propertyRules = resource.rules[property];
-			if (Array.isArray(propertyRules)) {
-				propertyRules.forEach(function (ruleName) {
-					var validator = rules[ruleName];
-					callValidator(property, object, validator);
+			var propVal = ob ? ob[propertyName] : undefined;
+
+			if (Array.isArray(propVal)) {
+				propVal.forEach(function (i) {
+					callValidator(propertyName, i, validator);
 				});
 			} else {
-				var ruleName = propertyRules;
-				var validator = rules[ruleName];
+				callValidator(propertyName, propVal, validator);
+			}
 
-				callValidator(property, object, validator);
+			function callValidator(prop, value, validtr) {
+				var result = validtr.func(prop, value, validtr.dependencies);
+				if (result !== undefined) {
+					if (result.toString && result.toString() === '[object Promise]') {
+						result.then(function (err) {
+							if (err) {
+								var errs = [];
+								if (!err.property) {
+									errs.push('[property] is expected on the resolved promise object');
+								}
+
+								if (!err.message) {
+									errs.push('[message] is expected on the resolved promise object');
+								}
+
+								if (errs.length) {
+									throw Error(errs);
+								}
+
+								errors.push('[' + err.property + '] ' + err.message);
+							}
+						});
+
+						validationPromises.push(result);
+					} else {
+						errors.push('[' + prop + '] ' + result);
+						validationPromises.push(q.resolve());
+					}
+				}
 			}
 		}
+
+		function traverseRulesObject(rulesObject, obj) {
+			for (var property in rulesObject) {
+				if (!rulesObject.hasOwnProperty(property)) {
+					continue;
+				}
+
+				var propertyValue = rulesObject[property];
+				if (Array.isArray(propertyValue)) {
+					// traverse the array, we've found multiple rules!
+					propertyValue.forEach(function (ruleName) {
+						var validator = rules[ruleName];
+						traversePropertyRules(property, obj, validator);
+					});
+				}
+				else if (typeof propertyValue === 'object') {
+					// traverse the object, its more another rule object!
+					traverseRulesObject(propertyValue, obj[property] || undefined);
+				} else {
+					// we've found a single rule!
+					var ruleName = propertyValue;
+					var validator = rules[ruleName];
+
+					traversePropertyRules(property, obj, validator);
+				}
+			}
+		}
+
+		traverseRulesObject(resource.rules, object);
 
 		q.all(validationPromises)
 			.then(function () {
@@ -140,20 +165,21 @@ GottaValidate.addRule = function (rule) {
 GottaValidate.addResource = function (resource) {
 	var errors = [];
 
-	// todo: add array capability to name so we can
-	// have alias'? such as create is the same as update
-
-	function validateRule(property, rule, isArray) {
-		var arrayText = isArray ? ' in array' : '';
-
+	function validateRule(property, rule) {
 		if (Array.isArray(rule)) {
+			// traverse array validating rules
 			rule.forEach(function (r) {
-				validateRule(property, r, true);
+				validateRule(property, r);
 			});
-		} else if (typeof rule !== 'string') {
-			errors.push('Rule'+ arrayText + ' for property [' + property + '] can only be strings! Try a string or array of strings!');
-		} else if (!rules[rule]) {
-			errors.push('Rule "' + rule + '"' + arrayText + ' for property [' + property + '] is not defined. Add it before adding a resource!');
+		} else if (typeof rule === 'object') {
+			// traverse object validating rules
+			for(var childProperty in rule) {
+				if (rule.hasOwnProperty(childProperty)) {
+					validateRule(childProperty, rule[childProperty]);
+				}
+			}
+		}	else if (!rules[rule]) {
+			errors.push('Rule "' + rule + '"' + ' for property [' + property + '] is not defined. Add it before adding a resource!');
 		}
 	}
 

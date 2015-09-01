@@ -1,12 +1,11 @@
 'use strict';
 
-function noWhiteSpace(name, object) {
-	var item = object[name];
-	if (!item) {
+function noWhiteSpace(name, val) {
+	if (!val) {
 		return;
 	}
 
-	if (!/^\S+@\S+\.\S+$/.test(item)) {
+	if (!/^\S+@\S+\.\S+$/.test(val)) {
 		return 'needs to be a valid email, e.g. "email@valid.com"';
 	}
 }

@@ -1,12 +1,11 @@
 'use strict';
 
-function noWhiteSpace(name, object) {
-	var item = object[name];
-	if (!item) {
+function noWhiteSpace(name, val) {
+	if (!val) {
 		return;
 	}
 
-	if (/\s/g.test(item)) {
+	if (/\s/g.test(val)) {
 		return 'is not allowed to have spaces';
 	}
 }

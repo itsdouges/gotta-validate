@@ -9,9 +9,8 @@ describe('examples', function () {
 		beforeEach(function () {
 			GottaValidate.addRule({
 			    name: 'required',
-			    func: function (property, object) {
-			        var item = object[property];
-			        if (!item) {
+			    func: function (property, val) {
+			        if (val === undefined) {
 			            return 'is required!';
 			        }
 			    }
@@ -112,7 +111,7 @@ describe('examples', function () {
 		it('should resolve dependency', function () {
 			GottaValidate.addRule({
 			    name: 'depender',
-			    func: function (property, object, dependencies) {
+			    func: function (property, val, dependencies) {
 			        var error = dependencies.a();
 			        if (error) {
 			            return 'oh no error!';
