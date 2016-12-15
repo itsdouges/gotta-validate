@@ -1,28 +1,27 @@
-# Gotta Validate! 
-[![Build Status](https://img.shields.io/travis/madou/gotta-validate.svg)](https://travis-ci.org/madou/gotta-validate)
-[![NPM Version](https://img.shields.io/npm/v/gotta-validate.svg)](https://www.npmjs.com/package/gotta-validate)
+# Gotta Validate!  [![Build Status](https://img.shields.io/travis/madou/gotta-validate.svg)](https://travis-ci.org/madou/gotta-validate) [![NPM Version](https://img.shields.io/npm/v/gotta-validate.svg)](https://www.npmjs.com/package/gotta-validate)
 
-> A POJO object validator for node, built with resources, promises, and testing in mind. 
+> An async object validator for node.
 
-Currently being used on armory.net.au's node backend. Still a work in progress and missing many common validators. If you're using **Gotta Validate!** please submit pull requests to add rules you've made! Make sure to add tests else it will be rejected.
+Made for `api.gw2armory.com`. If you've stumbled upon this it's debatable if this is really worthwhile using. I'd advise using a more mature library.
 
 To run tests use: `gulp test`.
 
 ## 1. Examples
 ### 1.1 General stuff
-Note: Take a look at src/example.spec.js for these tests.
+Note: Take a look at `src/example.spec.js` for these tests.
 
 Require it!
 
 ```
-var GottaValidate = require('gotta-validate');
+import gottaValidate from 'gotta-validate';
 ```
 
-Add rules you need, you can chain it too.
+Add rules you need, you can chain them too.
+
 ```
-GottaValidate.addRule({
+gottaValidate.addRule({
     name: 'required',
-    func: function (property, object) {
+    func: (property, object) => {
         var item = object[property];
         if (!item) {
             return 'is required!';
@@ -34,7 +33,7 @@ GottaValidate.addRule({
 
 Add resources you need, you can chain it too. Add the name of any property you want to validate to the rules object. It can be a single rule (string) or many rules with an array (of strings).
 ```
-GottaValidate.addResource({
+gottaValidate.addResource({
     name: 'Users',
     mode: 'create',
     rules: {
@@ -46,33 +45,31 @@ GottaValidate.addResource({
 ```
 
 Now you gotta validate! Call the constructor function every time you want a different validator. The promise will resolve if validation was a success, and reject if any validators returned an error.
+
 ```
-var validator = GottaValidate({
+var validator = gottaValidate({
     resource: 'Users',
     mode: 'create'
 });
 
-var my_object = {};
+const user = {};
 
-validator
-    .validate(my_object)
-    .then(null, function (e) {
+validator.validate(user)
+    .catch((e) => {
         expect(e).toBe([
             '[id] is required!', 
             '[email] is required!' 
         ]);
     });
     
-my_object = {
+const validUser = {
     id: 'ayylmao',
     email: 'coolemailthough'
 };
 
-validator
-    .validate(my_object)
-    .then(function (e) {
+validator.validate(validUser)
+    .then((e) => {
         expect(e).not.toBeDefined();
-        done();
     });
 ```
 
@@ -80,9 +77,9 @@ validator
 Rules which you can use without needing to add yourself are as follows (after using the addDefaultRules method).
 
 ```
-GottaValidate.addDefaultRules();
+gottaValidate.addDefaultRules();
 
-GottaValidate.addResource({
+gottaValidate.addResource({
     name: 'cool-resource',
     mode: 'mode',
     rules: {
@@ -93,28 +90,24 @@ GottaValidate.addResource({
 
 ### 1.3 Extra stuff
 #### 1.3.1 Promise based rules
-You can add promise based rules like the following. You can use any library that will work with **q**. Just make sure you return a promise! If an error occurred return an object like in the example.
+You can add promise based rules like the following. Just make sure you return a promise! If an error occurred return an object like in the example.
 
 ```
-var somethingAsync = require('something-async');
+var async = require('something-async');
 
-GottaValidate.addRule({
+gottaValidate.addRule({
     name: 'required',
-    func: function (property, object) {
-        var defer = q.defer();
-        
-        if (something_bad_happened_immediately) {
-            return q.reject({
+    func: (property, object) => {
+        if (0 === 1) {
+            return Promise.reject({
                 property: property,
                 message: 'was bad!'
             });
         }
         
-        somethingAsync.then(function (e) {
+        return async().then(function (e) {
             // resolve or reject
         });
-        
-        return defer.promise;
     }
 });
 ```
@@ -122,9 +115,9 @@ GottaValidate.addRule({
 You can also add rules that have dependencies. Promise based or synchronous!
 
 ```
-GottaValidate.addRule({
+gottaValidate.addRule({
     name: 'depender',
-    func: function (property, object, dependencies) {
+    func: (property, object, dependencies) => {
         var error = dependencies.a();
         if (error) {
             return 'oh no error!';
@@ -138,28 +131,28 @@ GottaValidate.addRule({
 
 ### 1.3.3 Rules that inherit
 ```
-    GottaValidate.addRule({
-        name: 'rule-a',
-        func: function () {
-            return 'bad';
-        }
-    });
+gottaValidate.addRule({
+    name: 'rule-a',
+    func: function () {
+        return 'bad';
+    }
+});
 
-    GottaValidate.addRule({
-        name: 'rule-b',
-        func: function () {
-            return 'naughty!';
-        },
-        inherits: ['rule-a'] // Array for multiple, string for single
-    });
+gottaValidate.addRule({
+    name: 'rule-b',
+    func: function () {
+        return 'naughty!';
+    },
+    inherits: ['rule-a'] // Array for multiple, string for single
+});
 
-    GottaValidate.addResource({
-        name: 'inherit',
-        mode: 'deez',
-        rules: {
-            id: ['rule-b']
-        }
-    });
+gottaValidate.addResource({
+    name: 'inherit',
+    mode: 'deez',
+    rules: {
+        id: ['rule-b']
+    }
+});
 ```
 
 ## 2. Api
@@ -169,7 +162,7 @@ Add some rules and resources and then call the consturctor method. No need for n
 Options properties:
 resource (required), mode (required)
 ```
-var validator = GottaValidate(options);
+const validator = gottaValidate(options);
 validator.validate(object);
 ```
 
